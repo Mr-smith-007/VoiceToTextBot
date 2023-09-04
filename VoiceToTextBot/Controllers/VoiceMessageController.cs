@@ -32,8 +32,8 @@ namespace VoiceToTextBot.Controllers
 
             await _audioFileHandler.Download(fileId, ct);
 
-            string userLanguageCode = _memoryStorage.GetSession(message.Chat.Id).LanguageCode;
-            var result = _audioFileHandler.Process(userLanguageCode); 
+            string userLanguageCode = _memoryStorage.GetSession(message.Chat.Id).LanguageCode; 
+            string result = _audioFileHandler.Process(userLanguageCode); 
             await _telegramClient.SendTextMessageAsync(message.Chat.Id, result, cancellationToken: ct);
         }
     }
