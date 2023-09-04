@@ -4,7 +4,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Telegram.Bot;
+using VoiceToTextBot.Configuration;
 using VoiceToTextBot.Controllers;
+using VoiceToTextBot.Services;
 
 namespace VoiceTexterBot
 {
@@ -26,8 +28,23 @@ namespace VoiceTexterBot
             Console.WriteLine("Сервис остановлен");
         }
 
+        static AppSettings BuildAppSettings()
+        {
+            return new AppSettings()
+            {
+                DownloadsFolder = "C:\\Users\\repnikov.a\\Downloads",
+                BotToken = "6124763203:AAHiGQsV-CcQTsjJbPtvq_d3Mu8Zln0FFTQ",
+                AudioFileName = "audio",
+                InputAudioFormat = "ogg",
+                OutputAudioFormat = "wav",
+            };
+        }
         static void ConfigureServices(IServiceCollection services)
         {
+            AppSettings appSettings = BuildAppSettings();
+            services.AddSingleton(BuildAppSettings());
+
+            services.AddSingleton<IStorage, MemoryStorage>();
 
             // Подключаем контроллеры сообщений и кнопок
             services.AddTransient<DefaultMessageController>();
@@ -35,7 +52,8 @@ namespace VoiceTexterBot
             services.AddTransient<TextMessageController>();
             services.AddTransient<InlineKeyboardController>();
 
-            services.AddSingleton<ITelegramBotClient>(provider => new TelegramBotClient("Token"));
+            services.AddSingleton<IFileHandler, AudioFileHandler>();
+            services.AddSingleton<ITelegramBotClient>(provider => new TelegramBotClient(appSettings.BotToken));
             services.AddHostedService<Bot>();
         }
     }
